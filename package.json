@@ -1,0 +1,14 @@
+{
+  "name": "inky-extension",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/unit.test.js",
+    "test:e2e": "node test/e2e/audit.mjs"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "^1.56.0"
+  }
+}

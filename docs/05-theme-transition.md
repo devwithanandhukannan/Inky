@@ -1,0 +1,2 @@
+# 05 — Transitions
+`document.startViewTransition` with `::view-transition-new(root)` clip-path animated from `circle(0 at 50% 0)` to the farthest corner (700 ms, ease-out). Palette/mode changes use a 400 ms cross-fade. On first load the body is held at opacity 0 until the first pass finishes (800 ms failsafe) then fades in over 220 ms. No API, hidden tab or `prefers-reduced-motion` → instant apply.

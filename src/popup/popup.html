@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <title>Inky</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div class="brand"><img src="../icons/icon-48.png" alt="" width="26" height="26"><span>Inky</span></div>
+      <label class="switch" title="Dark mode (Alt+Shift+D)"><input id="power" type="checkbox" aria-label="Dark mode"><i></i></label>
+    </header>
+
+    <section class="site">
+      <div class="site-top">
+        <div class="site-name"><h2 id="host">—</h2><p id="status">&nbsp;</p></div>
+        <button id="force" class="pill" hidden>Force dark</button>
+      </div>
+      <div class="seg" id="siteMode" role="tablist" aria-label="This site">
+        <button data-m="auto">Auto</button><button data-m="smart">Smart</button><button data-m="filter">Filter</button><button data-m="off">Off</button>
+        <span class="thumb"></span>
+      </div>
+    </section>
+
+    <button id="pick" class="pickbtn" hidden><span class="pi"></span><span class="grow2"><b>Fix an element</b><small id="fixInfo">Something look wrong? Point at it.</small></span></button>
+
+    <section>
+      <h3>Theme</h3>
+      <div class="cards" id="cards"></div>
+      <div class="chips" id="chips"></div>
+    </section>
+
+    <section class="night">
+      <div class="row">
+        <div class="ico sun"></div>
+        <div class="grow"><b>Night light</b><span>Blue-light filter for reading</span></div>
+        <label class="switch" title="Night light (Alt+Shift+N)"><input id="nightOn" type="checkbox" aria-label="Night light"><i></i></label>
+      </div>
+      <div class="night-body" id="nightBody">
+        <label class="slider"><span>Warmth</span><input id="warmth" type="range" min="0" max="100" class="warm"><output></output></label>
+        <label class="slider"><span>Dim</span><input id="dim" type="range" min="0" max="60"><output></output></label>
+      </div>
+    </section>
+
+    <details>
+      <summary>Fine-tune</summary>
+      <label class="slider"><span>Brightness</span><input id="brightness" type="range" min="60" max="120"><output></output></label>
+      <label class="slider"><span>Contrast</span><input id="contrast" type="range" min="70" max="130"><output></output></label>
+      <label class="slider"><span>Image dim</span><input id="imageDim" type="range" min="0" max="40"><output></output></label>
+    </details>
+
+    <footer>
+      <button id="settings" class="link">Settings &amp; palettes</button>
+      <span class="hint">Alt+Shift+D · Alt+Shift+N</span>
+    </footer>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

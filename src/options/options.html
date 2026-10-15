@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Inky Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <img src="../icons/icon-128.png" width="52" height="52" alt="">
+      <div><h1>Inky</h1><p>Smart dark mode &amp; night light</p></div>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <a href="#appearance" class="on">Appearance</a><a href="#night">Night light</a><a href="#behavior">Behavior</a><a href="#sites">Sites</a>
+    </nav>
+
+    <section id="appearance">
+      <h2>Palettes</h2>
+      <div class="grid" id="palGrid"></div>
+      <div class="actions">
+        <button class="btn" id="newPal">New palette</button>
+        <button class="btn ghost" id="exportBtn">Export</button>
+        <button class="btn ghost" id="importBtn">Import</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+      <p class="msg" id="palMsg"></p>
+
+      <div class="editor" id="editor" hidden>
+        <div class="ed-form">
+          <label class="field"><span>Name</span><input id="edName" maxlength="40" placeholder="My palette"></label>
+          <div class="colors" id="edColors"></div>
+          <div class="actions">
+            <button class="btn ghost" id="edGen">Generate from accent</button>
+            <button class="btn ghost" id="edRand">Surprise me</button>
+          </div>
+          <div class="contrast" id="edContrast"></div>
+          <p class="msg err" id="edErr"></p>
+          <div class="actions"><button class="btn" id="edSave">Save palette</button><button class="btn ghost" id="edCancel">Cancel</button></div>
+        </div>
+        <div class="ed-preview" id="edPreview">
+          <div class="pv-bar"></div>
+          <h4>Preview</h4>
+          <p>Body text reads like this. <a>A link looks like this.</a></p>
+          <div class="pv-card"><b>Surface</b><span>Muted details</span></div>
+          <button class="pv-btn" tabindex="-1">Accent</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="night">
+      <h2>Night light</h2>
+      <div class="list">
+        <div class="item"><div><b>Enable blue-light filter</b><span>Warms the screen with a gentle colour overlay.</span></div><label class="switch"><input type="checkbox" id="nOn"><i></i></label></div>
+        <label class="item col"><div class="between"><b>Warmth</b><output id="nWarmthO"></output></div><input type="range" class="warm" id="nWarmth" min="0" max="100"></label>
+        <label class="item col"><div class="between"><b>Dim</b><output id="nDimO"></output></div><input type="range" id="nDim" min="0" max="60"></label>
+        <div class="item"><div><b>Schedule</b><span>Turn on automatically between these times.</span></div><label class="switch"><input type="checkbox" id="nAuto"><i></i></label></div>
+        <div class="item times" id="nTimes"><label>From <input type="time" id="nFrom"></label><label>To <input type="time" id="nTo"></label></div>
+      </div>
+    </section>
+
+    <section id="behavior">
+      <h2>Behavior</h2>
+      <div class="list">
+        <div class="item"><div><b>Dark mode</b><span>Master switch. Shortcut: Alt+Shift+D</span></div><label class="switch"><input type="checkbox" id="bEnabled"><i></i></label></div>
+        <div class="item"><div><b>When to apply</b><span>Always, with your system, or on a schedule.</span></div>
+          <select id="bAuto"><option value="always">Always</option><option value="system">Follow system</option><option value="schedule">Schedule</option></select></div>
+        <div class="item times" id="bTimes"><label>From <input type="time" id="bFrom"></label><label>To <input type="time" id="bTo"></label></div>
+        <div class="item"><div><b>Smart icons &amp; images</b><span>Detects dark PNG/SVG icons that would vanish and lightens only those.</span></div><label class="switch"><input type="checkbox" id="bImages"><i></i></label></div>
+        <div class="item"><div><b>Skip sites that are already dark</b><span>Avoids double-darkening. You can force it per site.</span></div><label class="switch"><input type="checkbox" id="bSkip"><i></i></label></div>
+        <div class="item"><div><b>Transition</b><span>How the page changes when you toggle.</span></div>
+          <select id="bAnim"><option value="circle">Circular reveal</option><option value="fade">Fade</option><option value="none">None</option></select></div>
+        <label class="item col"><div class="between"><b>Image dimming</b><output id="bDimO"></output></div><input type="range" id="bDim" min="0" max="40"></label>
+        <label class="item col"><div class="between"><b>Brightness</b><output id="bBriO"></output></div><input type="range" id="bBri" min="60" max="120"></label>
+        <label class="item col"><div class="between"><b>Contrast</b><output id="bConO"></output></div><input type="range" id="bCon" min="70" max="130"></label>
+      </div>
+    </section>
+
+    <section id="sites">
+      <h2>Sites</h2>
+      <p class="sub">Per-site rules you've set from the popup.</p>
+      <div class="list" id="siteList"></div>
+    </section>
+
+    <footer>Everything runs on your device. Inky has no servers, no analytics, and never sends page content anywhere.</footer>
+  </div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "Inky \u2014 Smart Dark Mode & Night Light",
+  "short_name": "Inky",
+  "version": "2.1.0",
+  "description": "Smart dark mode that understands icons and images, plus a blue-light night filter. Minimal, fast, private.",
+  "minimum_chrome_version": "111",
+  "icons": {
+    "16": "src/icons/icon-16.png",
+    "32": "src/icons/icon-32.png",
+    "48": "src/icons/icon-48.png",
+    "128": "src/icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Inky",
+    "default_icon": {
+      "16": "src/icons/icon-16.png",
+      "32": "src/icons/icon-32.png",
+      "48": "src/icons/icon-48.png",
+      "128": "src/icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+  "permissions": [
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "commands": {
+    "toggle-dark": {
+      "suggested_key": {
+        "default": "Alt+Shift+D"
+      },
+      "description": "Toggle dark mode"
+    },
+    "toggle-night": {
+      "suggested_key": {
+        "default": "Alt+Shift+N"
+      },
+      "description": "Toggle night light (blue-light filter)"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "src/shared/palettes.js",
+        "src/shared/color.js",
+        "src/content/engine.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ]
+}
