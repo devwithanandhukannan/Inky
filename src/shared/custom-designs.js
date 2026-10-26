@@ -137,36 +137,161 @@
       description: 'Darkens top promo banners, clean dark search bar input, and cohesive course card surfaces.',
       css: `
         /* ── Udemy Custom Design ── */
+        :root, body {
+          --color-gray-100: #1e2026 !important;
+          --color-gray-200: #2d3039 !important;
+          --color-gray-300: #3e424e !important;
+          --color-white: #16181f !important;
+          --color-black: #f8fafc !important;
+        }
+
+        /* Top Promo Banner & Links */
         .ud-announcement-bar, [class*="announcement-bar"], [data-purpose*="announcement-bar"],
-        [class*="smart-bar"], [class*="billboard-banner"] {
-          background: rgba(30, 32, 38, 0.95) !important;
-          color: #e4e7eb !important;
+        [class*="smart-bar"], [class*="billboard-banner"], [class*="banner--banner"] {
+          background: #14161d !important;
+          color: #f1f5f9 !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        .ud-announcement-bar a, [class*="announcement-bar"] a, [data-purpose*="announcement-bar"] a,
+        [class*="smart-bar"] a, [class*="banner"] a, [class*="smart-bar"] [class*="link"] {
+          color: #60a5fa !important;
+          text-decoration: underline !important;
+          font-weight: 600 !important;
+        }
+        [class*="announcement-bar"] button, [class*="smart-bar"] button {
+          color: #cbd5e1 !important;
+        }
+
+        /* Udemy Header & Logo */
+        [class*="header--header"], .ud-header, [data-purpose*="header"] {
+          background: #121318 !important;
           border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
         }
-        .ud-announcement-bar a, [class*="announcement-bar"] a {
-          color: #93c5fd !important;
-          text-decoration: underline !important;
+        /* Invert dark Udemy text logo so it is visible and crisp white */
+        [class*="header-logo"] img, [class*="header-logo"] svg,
+        [class*="header-brand"] img, [class*="header-brand"] svg,
+        a[href="/"] img[src*="logo"], a[href="/"] svg,
+        [data-purpose*="logo"] svg, [data-purpose*="logo"] img {
+          filter: invert(1) hue-rotate(180deg) brightness(1.8) !important;
         }
-        /* Search bar input */
-        .ud-search-form-autocomplete-input, input[name="q"], [class*="search-form-autocomplete"] input {
+
+        /* Header Navigation Links & Buttons */
+        [class*="header"] a, [class*="header"] button, .ud-header a, .ud-header button,
+        [class*="header"] span:not([class*="badge"]), [class*="header-menu"] button {
+          color: #e2e8f0 !important;
+        }
+        [class*="header"] a:hover, [class*="header"] button:hover {
+          color: #ffffff !important;
+        }
+
+        /* Search bar: Eliminate peach/cream outer oval wrapper & unify pill */
+        form[action*="/courses/search"],
+        .ud-search-form-autocomplete,
+        [class*="search-form-autocomplete"],
+        [class*="search-bar"],
+        [data-purpose*="search-bar"],
+        [class*="search-bar-module"] {
           background: #1e2026 !important;
-          color: #f1f5f9 !important;
-          border: 1px solid rgba(255, 255, 255, 0.12) !important;
+          background-color: #1e2026 !important;
+          border: 1px solid rgba(255, 255, 255, 0.14) !important;
+          border-radius: 9999px !important;
           box-shadow: none !important;
         }
-        .ud-search-form-autocomplete-input::placeholder, input[name="q"]::placeholder {
+        .ud-search-form-autocomplete-input,
+        input[name="q"],
+        [class*="search-form-autocomplete"] input,
+        [class*="search-bar"] input {
+          background: transparent !important;
+          background-color: transparent !important;
+          color: #f1f5f9 !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+        .ud-search-form-autocomplete-input::placeholder,
+        input[name="q"]::placeholder,
+        [class*="search-bar"] input::placeholder {
           color: #94a3b8 !important;
         }
-        /* Header navbar */
-        [class*="header--header"], .ud-header {
-          background: #131418 !important;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        .ud-search-form-autocomplete button,
+        [class*="search-form-autocomplete"] button,
+        [class*="search-bar"] button {
+          background: transparent !important;
+          color: #94a3b8 !important;
         }
+
+        /* Category navigation links */
+        [class*="sub-nav"] a, [class*="header-menu"] a, nav[class*="categories"] a,
+        [class*="sub-nav"] span, [class*="header-menu"] span {
+          color: #cbd5e1 !important;
+        }
+        [class*="sub-nav"] a:hover, nav[class*="categories"] a:hover {
+          color: #ffffff !important;
+        }
+
+        /* Carousel Navigation Arrows: Eliminate bright peach circle */
+        .ud-btn-round, [class*="btn-round"], [class*="carousel-control"],
+        [class*="paged-carousel"] button, button[class*="arrow"],
+        button[data-purpose*="next-button"], button[data-purpose*="prev-button"],
+        [class*="paged-carousel--arrow"], [class*="arrow-button"],
+        button.ud-btn-ghost.ud-btn-round {
+          background: #252834 !important;
+          background-color: #252834 !important;
+          color: #f8fafc !important;
+          border: 1px solid rgba(255, 255, 255, 0.16) !important;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+        }
+        [class*="carousel-control"]:hover, [class*="paged-carousel"] button:hover,
+        .ud-btn-round:hover {
+          background: #333748 !important;
+        }
+
+        /* Course card action round buttons / badges (Eliminate peach circle on cards) */
+        [class*="course-card"] button,
+        [data-purpose*="wishlist"], [class*="wishlist"],
+        button[aria-label*="wishlist" i], button[aria-label*="Save" i],
+        [class*="course-card"] [class*="badge--badge"],
+        [class*="course-card"] [class*="round"],
+        [class*="course-card"] [class*="avatar"] {
+          background: rgba(30, 32, 42, 0.9) !important;
+          background-color: rgba(30, 32, 42, 0.9) !important;
+          color: #f8fafc !important;
+          border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        }
+
+        /* Headings & Section Titles */
+        h1, h2, h3, h4, [class*="heading-"], [class*="headline-"] {
+          color: #f8fafc !important;
+        }
+        /* Links like "My learning", "Edit occupation and interests" */
+        [class*="header"] ~ main a:not([class*="course"]),
+        a[href*="/home/my-courses"], a[href*="/user/edit-profile"] {
+          color: #a78bfa !important;
+        }
+
         /* Course cards & learning containers */
         [class*="course-card"], [class*="unit-wrapper"], .ud-course-card, .course-card--container {
-          background: #18191f !important;
-          border: 1px solid rgba(255, 255, 255, 0.06) !important;
+          background: #181920 !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
           border-radius: 8px !important;
+        }
+        /* Course titles inside cards (fix unreadable dark blue/purple text) */
+        [class*="course-card"] a, [class*="course-card"] [class*="title"],
+        [class*="unit-wrapper"] a, [class*="unit-wrapper"] [class*="title"],
+        [class*="course-card"] h3, [class*="unit-wrapper"] h3 {
+          color: #f1f5f9 !important;
+        }
+        [class*="course-card"] a:hover, [class*="unit-wrapper"] a:hover {
+          color: #93c5fd !important;
+        }
+        /* Course metadata (Article • 1m, Lecture • 2m) */
+        [class*="course-card"] span, [class*="course-card"] p,
+        [class*="unit-wrapper"] span, [class*="unit-wrapper"] p {
+          color: #94a3b8 !important;
+        }
+        /* Premium badge */
+        [class*="badge-premium"], [class*="course-card"] [class*="premium"] {
+          background: #7c3aed !important;
+          color: #ffffff !important;
         }
       `
     },
