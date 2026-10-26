@@ -197,8 +197,29 @@
     return cols.reduce((a, b) => a + b, 0) / cols.length < 0.4;
   }
 
+  function cleanFragment(container, attrs) {
+    if (!container) return '';
+    const all = container.querySelectorAll ? container.querySelectorAll('*') : [];
+    for (let i = 0; i < all.length; i++) {
+      const el = all[i];
+      if (attrs) {
+        for (let j = 0; j < attrs.length; j++) el.removeAttribute(attrs[j]);
+      }
+    }
+    const links = container.querySelectorAll ? container.querySelectorAll('a[href]') : [];
+    for (let i = 0; i < links.length; i++) {
+      try { if (links[i].href) links[i].setAttribute('href', links[i].href); } catch (_) {}
+    }
+    const imgs = container.querySelectorAll ? container.querySelectorAll('img[src]') : [];
+    for (let i = 0; i < imgs.length; i++) {
+      try { if (imgs[i].src) imgs[i].setAttribute('src', imgs[i].src); } catch (_) {}
+    }
+    return container.innerHTML || '';
+  }
+
   g.InkyColor = g.LumoColor = {
     rgbToOklab, oklabToRgb, hexToRgb, rgbToHex, hexToOklab, parseCssColor, colorKey, cssOf,
-    makeMapper, filterContrast, kelvinToRgb, warmthToRgb, paletteFromAccent, classifyPixels, classifySvg
+    makeMapper, filterContrast, kelvinToRgb, warmthToRgb, paletteFromAccent, classifyPixels, classifySvg,
+    cleanFragment
   };
 })(globalThis);

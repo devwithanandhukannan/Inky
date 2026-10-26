@@ -79,3 +79,30 @@ footer { margin-top: 48px; color: var(--ink2); font-size: 13px; text-align: cent
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
 .site-row .acts { display: flex; gap: 14px; }
+.site-row .tag.off { background: rgba(255, 69, 58, .12); color: #ff453a; }
+
+/* Custom Site Designs Grid & Cards */
+.designs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.design-card {
+  background: var(--card); border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
+  border: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px;
+  transition: border-color .25s var(--ease), transform .2s var(--ease), box-shadow .2s;
+}
+.design-card.active { border-color: rgba(52, 199, 89, .4); }
+.design-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.design-card-header { display: flex; align-items: center; gap: 10px; }
+.design-card-header h4 { font-size: 15px; font-weight: 600; letter-spacing: -.01em; margin: 0; }
+.domains-tag { font-size: 11px; color: var(--ink2); display: block; margin-top: 2px; }
+.domain-tick {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%; background: #34c759; color: #fff;
+  font-size: 11px; font-weight: 700; line-height: 1; flex: none;
+  box-shadow: 0 1px 4px rgba(52, 199, 89, .35); transition: opacity .2s, transform .2s;
+}
+.domain-tick.hidden { opacity: 0; transform: scale(0.6); pointer-events: none; }
+.design-desc { font-size: 13px; color: var(--ink2); line-height: 1.4; flex: 1; margin: 0; }
+.design-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--line); }
+.status-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 99px; display: inline-flex; align-items: center; gap: 4px; }
+.status-badge.on { background: rgba(52, 199, 89, .15); color: #28a745; }
+.status-badge.off { background: var(--fill); color: var(--ink2); }
+

@@ -59,6 +59,7 @@
       "js": [
         "src/shared/palettes.js",
         "src/shared/color.js",
+        "src/shared/custom-designs.js",
         "src/content/engine.js"
       ],
       "run_at": "document_start",

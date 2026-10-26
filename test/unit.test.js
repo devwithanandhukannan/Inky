@@ -2,12 +2,14 @@ import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import '../src/shared/palettes.js';
 import '../src/shared/color.js';
+import '../src/shared/custom-designs.js';
 import { normalizeHost, getHostCandidates, resolve } from '../src/shared/match.js';
 import { checkContrast } from '../src/shared/derive.js';
 import * as store from '../src/shared/storage.js';
 
 const C = globalThis.InkyColor || globalThis.LumoColor;
 const P = globalThis.InkyPalettes || globalThis.LumoPalettes;
+const D = globalThis.InkyCustomDesigns;
 
 describe('palettes', () => {
   it('ships 3 primary cards + extras, graphite default', () => {
@@ -127,3 +129,97 @@ describe('storage', () => {
     assert.equal((await store.importPalettesJson('nope')).imported, 0);
   });
 });
+
+describe('clipboard sanitization', () => {
+  it('strips all Inky data attributes from copied fragment', () => {
+    const attrs = new Map([
+      ['data-lmb', '255 255 255'],
+      ['data-lmf', '0 0 0'],
+      ['data-lm', ''],
+      ['class', 'my-text']
+    ]);
+    const mockEl = {
+      removeAttribute: (a) => attrs.delete(a),
+      hasAttribute: (a) => attrs.has(a)
+    };
+    const mockContainer = {
+      innerHTML: '<span class="my-text">Hello</span>',
+      querySelectorAll: (sel) => {
+        if (sel === '*') return [mockEl];
+        return [];
+      }
+    };
+    const ATTRS = ['data-lmb', 'data-lmf', 'data-lmd', 'data-lmg', 'data-lms', 'data-lmk', 'data-lmi', 'data-lm'];
+    const html = C.cleanFragment(mockContainer, ATTRS);
+    assert.equal(attrs.has('data-lmb'), false);
+    assert.equal(attrs.has('data-lmf'), false);
+    assert.equal(attrs.has('data-lm'), false);
+    assert.equal(attrs.has('class'), true);
+    assert.equal(html, '<span class="my-text">Hello</span>');
+  });
+
+  it('resolves relative links and images', () => {
+    const link = { href: 'https://example.com/page', setAttribute(k, v) { this[k] = v; } };
+    const img = { src: 'https://example.com/pic.png', setAttribute(k, v) { this[k] = v; } };
+    const mockContainer = {
+      innerHTML: '<a href="https://example.com/page"><img src="https://example.com/pic.png"></a>',
+      querySelectorAll: (sel) => {
+        if (sel === 'a[href]') return [link];
+        if (sel === 'img[src]') return [img];
+        return [];
+      }
+    };
+    const html = C.cleanFragment(mockContainer, []);
+    assert.equal(link.href, 'https://example.com/page');
+    assert.equal(img.src, 'https://example.com/pic.png');
+    assert.ok(html.includes('https://example.com/page'));
+  });
+
+  it('handles null or empty container gracefully', () => {
+    assert.equal(C.cleanFragment(null, []), '');
+    assert.equal(C.cleanFragment({}, []), '');
+  });
+});
+
+describe('custom site designs', () => {
+  it('identifies famous daily use sites', () => {
+    assert.ok(D.find('amazon.in'));
+    assert.ok(D.find('www.amazon.com'));
+    assert.ok(D.find('flipkart.com'));
+    assert.ok(D.find('udemy.com'));
+    assert.ok(D.find('m.youtube.com'));
+    assert.ok(D.find('en.wikipedia.org'));
+    assert.equal(D.find('unknown-random-domain.xyz'), null);
+  });
+
+  it('provides tailored CSS when enabled and respects disable flags', () => {
+    const udemyCss = D.getCustomCss('udemy.com', {}, true);
+    assert.ok(udemyCss.includes('ud-announcement-bar'));
+    assert.ok(udemyCss.includes('ud-search-form-autocomplete-input'));
+
+    const amazonCss = D.getCustomCss('amazon.in', {}, true);
+    assert.ok(amazonCss.includes('s-search-result'));
+    assert.ok(amazonCss.includes('dealBadge'));
+
+    const flipkartCss = D.getCustomCss('flipkart.com', {}, true);
+    assert.ok(flipkartCss.includes('sponsored'));
+
+    // Master switch off -> empty CSS
+    assert.equal(D.getCustomCss('udemy.com', {}, false), '');
+
+    // Domain switch off -> empty CSS
+    assert.equal(D.getCustomCss('udemy.com', { udemy: false }, true), '');
+    assert.ok(D.getCustomCss('amazon.in', { udemy: false }, true).length > 0);
+  });
+
+  it('storage retains customDesigns and customSites settings', async () => {
+    store.resetMemory();
+    assert.equal((await store.getSettings()).customDesigns, true);
+    await store.updateSettings({ customDesigns: false, customSites: { amazon: false } });
+    const s = await store.getSettings();
+    assert.equal(s.customDesigns, false);
+    assert.equal(s.customSites.amazon, false);
+  });
+});
+
+

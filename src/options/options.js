@@ -4,7 +4,9 @@ import {
 } from '../shared/storage.js';
 import { checkContrast } from './../shared/derive.js';
 import '../shared/color.js';
+import '../shared/custom-designs.js';
 
+const D = globalThis.InkyCustomDesigns;
 const LC = globalThis.InkyColor || globalThis.LumoColor;
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -13,15 +15,16 @@ let S, palettes = [], editing = null;
 
 async function refresh() {
   S = await getSettings(); palettes = await getAllPalettes();
-  renderPalettes(); renderSettings(); await renderSites();
+  renderPalettes(); renderCustomDesigns(); renderSettings(); await renderSites();
 }
 
 /* ── palettes ── */
 function renderPalettes() {
   const g = $('palGrid'); g.textContent = '';
+  const isOff = S.enabled === false;
   for (const p of palettes) {
     const d = document.createElement('div');
-    d.className = 'pal' + (p.id === S.palette ? ' sel' : '');
+    d.className = 'pal' + (!isOff && p.id === S.palette ? ' sel' : '');
     d.innerHTML = `<div class="pv" style="background:${p.bg}"><div><div class="ln" style="background:${p.fg}"></div><div class="ln s" style="background:${p.fg}"></div></div><div class="pl" style="background:${p.accent}"></div></div>
       <div class="meta"><span>${esc(p.name)}</span><span class="tools">${p.builtin ? '' : '<button data-a="edit">Edit</button><button data-a="del" class="del">Delete</button>'}</span></div>`;
     d.onclick = async (e) => {
@@ -131,6 +134,52 @@ function renderSettings() {
   bindRange('bCon', 'bConO', () => S.contrast, (v) => ({ contrast: v }));
 }
 
+/* ── custom designs ── */
+function renderCustomDesigns() {
+  bindSwitch('cdMaster', () => S.customDesigns !== false, (v) => ({ customDesigns: v }));
+  const grid = $('designsGrid');
+  if (!grid || !D) return;
+  grid.textContent = '';
+  const masterOn = S.customDesigns !== false;
+
+  for (const site of D.list) {
+    const isSiteOn = masterOn && (S.customSites?.[site.id] !== false);
+    const card = document.createElement('div');
+    card.className = 'design-card' + (isSiteOn ? ' active' : '');
+    card.innerHTML = `
+      <div class="design-card-top">
+        <div class="design-card-header">
+          <span class="domain-tick ${isSiteOn ? '' : 'hidden'}">✓</span>
+          <div>
+            <h4>${esc(site.name)}</h4>
+            <span class="domains-tag">${esc(site.domains.slice(0, 3).join(', '))}${site.domains.length > 3 ? ' +' + (site.domains.length - 3) : ''}</span>
+          </div>
+        </div>
+        <label class="switch" title="Toggle custom design for ${esc(site.name)}">
+          <input type="checkbox" data-id="${site.id}" ${isSiteOn ? 'checked' : ''} ${!masterOn ? 'disabled' : ''}>
+          <i></i>
+        </label>
+      </div>
+      <p class="design-desc">${esc(site.description)}</p>
+      <div class="design-card-footer">
+        <span class="status-badge ${isSiteOn ? 'on' : 'off'}">
+          ${isSiteOn ? '✓ Active on domain' : 'Deselected / Off'}
+        </span>
+      </div>
+    `;
+
+    const toggle = card.querySelector('input[type=checkbox]');
+    toggle.onchange = async (e) => {
+      const checked = e.target.checked;
+      const customSites = { ...(S.customSites || {}), [site.id]: checked };
+      S = await updateSettings({ customSites });
+      renderCustomDesigns();
+    };
+
+    grid.append(card);
+  }
+}
+
 /* ── sites ── */
 async function renderSites() {
   const sites = await getSites(); const l = $('siteList'); l.textContent = '';
@@ -138,13 +187,17 @@ async function renderSites() {
   if (!hosts.length) { l.innerHTML = '<div class="empty">No site rules yet. Open the Inky popup on any page to set one.</div>'; return; }
   for (const h of hosts) {
     const r = sites[h]; const tags = [];
-    if (r.mode) tags.push(r.mode === 'off' ? 'Always light' : r.mode === 'filter' ? 'Filter mode' : 'Smart mode');
-    if (r.force) tags.push('Forced dark');
-    if (r.palette) tags.push('Palette: ' + r.palette);
-    if (r.night === false) tags.push('No night light');
-    if (r.fixes && r.fixes.length) tags.push(r.fixes.length + ' element fix' + (r.fixes.length > 1 ? 'es' : ''));
+    if (r.mode === 'off') {
+      tags.push('<em class="tag off">Always light · Theme deselected</em>');
+    } else {
+      if (r.mode) tags.push(`<em class="tag">${esc(r.mode === 'filter' ? 'Filter mode' : 'Smart mode')}</em>`);
+      if (r.palette) tags.push(`<em class="tag">Palette: ${esc(r.palette)}</em>`);
+    }
+    if (r.force) tags.push('<em class="tag">Forced dark</em>');
+    if (r.night === false) tags.push('<em class="tag">No night light</em>');
+    if (r.fixes && r.fixes.length) tags.push(`<em class="tag">${r.fixes.length} element fix${r.fixes.length > 1 ? 'es' : ''}</em>`);
     const d = document.createElement('div'); d.className = 'item site-row';
-    d.innerHTML = `<div><b>${esc(h)}</b><span>${tags.map((t) => `<em class="tag">${esc(t)}</em>`).join('')}</span></div><span class="acts">${r.fixes && r.fixes.length ? '<button data-a="fx">Clear fixes</button>' : ''}<button data-a="rm">Remove</button></span>`;
+    d.innerHTML = `<div><b>${esc(h)}</b><span>${tags.join('')}</span></div><span class="acts">${r.fixes && r.fixes.length ? '<button data-a="fx">Clear fixes</button>' : ''}<button data-a="rm">Remove</button></span>`;
     d.querySelectorAll('button').forEach((b) => { b.onclick = async () => { await setSite(h, b.dataset.a === 'fx' ? { fixes: undefined } : null); renderSites(); }; });
     l.append(d);
   }

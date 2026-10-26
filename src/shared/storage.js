@@ -21,7 +21,9 @@ export const DEFAULT_SETTINGS = {
   imageDim: 8,
   brightness: 100,
   contrast: 100,
-  night: { on: false, warmth: 45, dim: 0, auto: false, from: '21:00', to: '06:00' }
+  night: { on: false, warmth: 45, dim: 0, auto: false, from: '21:00', to: '06:00' },
+  customDesigns: true,
+  customSites: {}
 };
 
 const mem = {};
@@ -41,7 +43,8 @@ function mergeSettings(s = {}) {
   return {
     ...DEFAULT_SETTINGS, ...s,
     schedule: { ...DEFAULT_SETTINGS.schedule, ...s.schedule },
-    night: { ...DEFAULT_SETTINGS.night, ...s.night }
+    night: { ...DEFAULT_SETTINGS.night, ...s.night },
+    customSites: { ...(DEFAULT_SETTINGS.customSites || {}), ...(s.customSites || {}) }
   };
 }
 
@@ -51,7 +54,8 @@ export async function updateSettings(patch) {
   const next = mergeSettings({
     ...cur, ...patch,
     schedule: { ...cur.schedule, ...patch.schedule },
-    night: { ...cur.night, ...patch.night }
+    night: { ...cur.night, ...patch.night },
+    customSites: { ...(cur.customSites || {}), ...(patch.customSites || {}) }
   });
   await write('settings', next);
   return next;

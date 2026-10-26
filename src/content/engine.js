@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.__inky__ || window.__lumo__) return;
-  const C = globalThis.InkyColor || globalThis.LumoColor, P = globalThis.InkyPalettes || globalThis.LumoPalettes;
+  const C = globalThis.InkyColor || globalThis.LumoColor, P = globalThis.InkyPalettes || globalThis.LumoPalettes, D = globalThis.InkyCustomDesigns;
   const doc = document, root = doc.documentElement;
   if (!C || !P || !root || root.tagName !== 'HTML' || (doc.contentType && doc.contentType !== 'text/html')) return;
   window.__inky__ = window.__lumo__ = true;
@@ -24,7 +24,8 @@
   const DEFAULTS = {
     enabled: true, palette: 'graphite', auto: 'always', schedule: { from: '19:00', to: '07:00' },
     animation: 'circle', smartImages: true, skipDark: true, imageDim: 8, brightness: 100, contrast: 100,
-    night: { on: false, warmth: 45, dim: 0, auto: false, from: '21:00', to: '06:00' }
+    night: { on: false, warmth: 45, dim: 0, auto: false, from: '21:00', to: '06:00' },
+    customDesigns: true, customSites: {}
   };
   let S = DEFAULTS, SITES = {}, PALS = {};
   let ignoreSel = '', invertSel = '', fixKey = '';
@@ -33,7 +34,8 @@
     const s = raw || {};
     return Object.assign({}, DEFAULTS, s, {
       schedule: Object.assign({}, DEFAULTS.schedule, s.schedule),
-      night: Object.assign({}, DEFAULTS.night, s.night)
+      night: Object.assign({}, DEFAULTS.night, s.night),
+      customSites: Object.assign({}, DEFAULTS.customSites, s.customSites)
     });
   }
   const getPalette = (id) => P.get(id) || PALS[id] || P.get(P.DEFAULT_ID);
@@ -124,6 +126,7 @@
   const baseSheet = new Sheet('inky-base');
   const rulesSheet = new Sheet('inky-rules');
   const nightSheet = new Sheet('inky-night');
+  const customSheet = new Sheet('inky-custom');
 
   /* ───────────── smart engine state ───────────── */
   let view = null;           // last applied view
@@ -592,11 +595,21 @@
         } else baseSheet.unmount();
       });
     } else if (next.dark && !skipped) baseSheet.set(baseCss(next)); // brightness / contrast / dim tweaks
+
+    if (next.dark && !skipped && D && S.customDesigns !== false) {
+      const customCss = D.getCustomCss(location.hostname, S.customSites, S.customDesigns);
+      if (customCss) { customSheet.set(customCss); customSheet.mount(); }
+      else customSheet.unmount();
+    } else {
+      customSheet.unmount();
+    }
+
     applyNight(next);
   }
   function stopSmartIfNeeded(prev, next) {
     if (smartOn && (!next.dark || next.mode !== 'smart' || skipped)) stopSmart();
     if (!next.dark || next.mode !== 'filter') { if (!smartOn && !(next.dark && next.mode === 'smart')) baseSheet.unmount(); }
+    if (!next.dark || skipped) customSheet.unmount();
   }
 
   async function update(animate) {
@@ -635,7 +648,18 @@
     if (!msg) return;
     if (msg.type === 'GET_STATUS') {
       if (!IS_TOP) return;
-      send({ host: location.hostname, active: !!(view && view.dark && !skipped), skipped: skipped, mode: view ? view.mode : 'smart', night: !!(view && view.night), rules: rules.size, fixes: view ? view.fixes.length : 0 });
+      const customSite = D ? D.find(location.hostname) : null;
+      const customActive = !!(customSite && S.customDesigns !== false && S.customSites?.[customSite.id] !== false);
+      send({
+        host: location.hostname,
+        active: !!(view && view.dark && !skipped),
+        skipped: skipped,
+        mode: view ? view.mode : 'smart',
+        night: !!(view && view.night),
+        rules: rules.size,
+        fixes: view ? view.fixes.length : 0,
+        customSite: customSite ? { id: customSite.id, name: customSite.name, active: customActive } : null
+      });
     }
   });
 
@@ -724,6 +748,35 @@
     } };
   }
   chrome.runtime.onMessage.addListener((msg) => { if (msg && msg.type === 'PICK') startPicker(); });
+
+  /* ───────────── clipboard clean-up on copy ───────────── */
+  function onCopy(e) {
+    if (!view || !view.dark || skipped) return;
+    if (e.defaultPrevented || !e.clipboardData) return;
+
+    let cur = doc.activeElement;
+    while (cur && cur.shadowRoot && cur.shadowRoot.activeElement) cur = cur.shadowRoot.activeElement;
+    if (cur && (cur.tagName === 'INPUT' || cur.tagName === 'TEXTAREA')) return;
+
+    const sel = doc.getSelection();
+    if (!sel || !sel.rangeCount || sel.isCollapsed) return;
+    const text = sel.toString();
+    if (!text) return;
+
+    try {
+      const container = doc.createElement('div');
+      for (let i = 0; i < sel.rangeCount; i++) {
+        container.appendChild(sel.getRangeAt(i).cloneContents());
+      }
+      const html = C && C.cleanFragment ? C.cleanFragment(container, ATTRS) : container.innerHTML;
+      if (html) e.clipboardData.setData('text/html', html);
+      e.clipboardData.setData('text/plain', text);
+      e.preventDefault();
+    } catch (_) {
+      // If cloning or clipboardData fails, let native copy proceed safely
+    }
+  }
+  doc.addEventListener('copy', onCopy, false);
 
   boot();
 })();

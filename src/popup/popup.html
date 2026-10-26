@@ -24,10 +24,29 @@
       </div>
     </section>
 
+    <section class="custom-design-box" id="cdBox" hidden>
+      <div class="row">
+        <div class="cd-info">
+          <div class="cd-title-row">
+            <span class="domain-tick" id="cdTick">✓</span>
+            <b id="cdName">Custom Design</b>
+          </div>
+          <span class="cd-desc" id="cdDesc">Tailored dark CSS for this domain</span>
+        </div>
+        <label class="switch" title="Toggle custom design for this domain">
+          <input id="cdToggle" type="checkbox" aria-label="Toggle custom design">
+          <i></i>
+        </label>
+      </div>
+    </section>
+
     <button id="pick" class="pickbtn" hidden><span class="pi"></span><span class="grow2"><b>Fix an element</b><small id="fixInfo">Something look wrong? Point at it.</small></span></button>
 
-    <section>
-      <h3>Theme</h3>
+    <section id="themeSection">
+      <div class="theme-header">
+        <h3>Theme</h3>
+        <small id="themeStatus"></small>
+      </div>
       <div class="cards" id="cards"></div>
       <div class="chips" id="chips"></div>
     </section>

@@ -1,5 +1,7 @@
 import { getSettings, updateSettings, getSites, setSite, getAllPalettes } from '../shared/storage.js';
+import '../shared/custom-designs.js';
 
+const D = globalThis.InkyCustomDesigns;
 const $ = (id) => document.getElementById(id);
 const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
 
@@ -53,15 +55,51 @@ function render() {
   document.querySelectorAll('#siteMode button').forEach((b) => b.classList.toggle('on', b.dataset.m === mode));
   document.querySelector('#siteMode .thumb').style.transform = `translateX(${modes.indexOf(mode) * 100}%)`;
 
-  // theme cards: the 3 primary palettes
-  const sel = rule.palette || settings.palette;
+  // custom design for famous site domain
+  const cdBox = $('cdBox');
+  const customSite = status?.customSite || (D ? D.find(host) : null);
+  if (customSite && host) {
+    cdBox.hidden = false;
+    const isCdOn = settings.customDesigns !== false && (settings.customSites?.[customSite.id] !== false);
+    $('cdName').textContent = `${customSite.name} Design`;
+    const siteObj = D ? D.find(host) : null;
+    if (siteObj && $('cdDesc')) $('cdDesc').textContent = siteObj.description;
+    $('cdToggle').checked = isCdOn;
+    $('cdTick').style.display = isCdOn ? 'inline-flex' : 'none';
+    cdBox.classList.toggle('active', isCdOn);
+    $('cdToggle').onchange = async (e) => {
+      const checked = e.target.checked;
+      const customSites = { ...(settings.customSites || {}), [customSite.id]: checked };
+      settings = await updateSettings({ customSites });
+      $('cdTick').style.display = checked ? 'inline-flex' : 'none';
+      cdBox.classList.toggle('active', checked);
+      setTimeout(load, 350);
+    };
+  } else {
+    cdBox.hidden = true;
+  }
+
+  // theme cards: deselect theme if site is off or dark mode is disabled
+  const isOff = !settings.enabled || mode === 'off';
+  const sel = isOff ? null : (rule.palette || settings.palette);
+  const themeSection = $('themeSection');
+  if (themeSection) {
+    themeSection.classList.toggle('theme-off', isOff);
+    $('themeStatus').textContent = isOff ? 'Deselected (Site is Off)' : '';
+  }
+
   const cards = $('cards'); cards.textContent = '';
   for (const p of palettes.filter((x) => x.primary)) {
     const b = document.createElement('button');
     b.className = 'card' + (p.id === sel ? ' sel' : '');
     b.innerHTML = `<div class="pv" style="background:${p.bg}"><div><div class="ln" style="background:${p.fg}"></div><div class="ln s" style="background:${p.fg};margin-top:4px"></div></div><div class="pl" style="background:${p.accent}"></div></div>
       <div class="nm"><span>${p.name}</span><span class="dots"><i style="background:${p.bg}"></i><i style="background:${p.fg}"></i><i style="background:${p.accent}"></i></span></div>`;
-    b.onclick = () => pickPalette(p.id);
+    b.onclick = async () => {
+      if (mode === 'off') {
+        sites = await setSite(ruleKey(), { mode: undefined });
+      }
+      pickPalette(p.id);
+    };
     cards.append(b);
   }
   const chips = $('chips'); chips.textContent = '';
@@ -69,7 +107,12 @@ function render() {
     const b = document.createElement('button');
     b.className = 'chip' + (p.id === sel ? ' sel' : '');
     b.innerHTML = `<i style="background:linear-gradient(135deg,${p.bg} 50%,${p.accent} 50%)"></i>${p.name.replace(/</g, '&lt;')}`;
-    b.onclick = () => pickPalette(p.id);
+    b.onclick = async () => {
+      if (mode === 'off') {
+        sites = await setSite(ruleKey(), { mode: undefined });
+      }
+      pickPalette(p.id);
+    };
     chips.append(b);
   }
   const add = document.createElement('button');
